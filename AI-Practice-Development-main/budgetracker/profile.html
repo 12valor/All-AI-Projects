@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="app.js"></script>
+    <style>
+    .profile-card {
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 2px 12px rgba(99,102,241,0.08);
+        border-radius: 8px;
+        padding: 32px 24px 24px 24px;
+        max-width: 400px;
+        margin: 32px auto 0 auto;
+        text-align: center;
+    }
+    .profile-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #e0e7ef;
+        margin-bottom: 16px;
+        border: 2.5px solid #6366f1;
+        display: inline-block;
+    }
+    .profile-username {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+    .profile-upload-btn {
+        margin: 8px 0 16px 0;
+        display: block;
+        width: 100%;
+    }
+    .profile-card form {
+        margin-top: 18px;
+    }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar glass">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-coins"></i>
+                <span>Budget Tracker</span>
+            </div>
+            <nav>
+                <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="income.html" class="nav-link"><i class="fa-solid fa-money-bill-trend-up"></i> Income</a>
+                <a href="wallets.html" class="nav-link"><i class="fa-solid fa-piggy-bank"></i> Wallets</a>
+                <a href="expenses.html" class="nav-link"><i class="fa-solid fa-receipt"></i> Expenses</a>
+                <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                <a href="export.html" class="nav-link"><i class="fa-solid fa-file-export"></i> Export/Import</a>
+                <a href="about.html" class="nav-link"><i class="fa-solid fa-circle-info"></i> About</a>
+                <a href="help.html" class="nav-link"><i class="fa-solid fa-question-circle"></i> Help</a>
+                <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="dashboard-header glass">
+                <div class="header-title" id="header-welcome">
+                    <!-- Welcome message will be set by JS -->
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <a href="dashboard.html" class="dark-toggle-btn" title="Back to Dashboard">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <button id="logout-btn-header" class="dark-toggle-btn" title="Log Out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+            <main>
+                <section id="profile-section">
+                    <div class="profile-card">
+                        <img id="profile-avatar" class="profile-avatar" src="" alt="Profile Picture" />
+                        <div class="profile-username" id="profile-username"></div>
+                        <input type="file" id="profile-pic-upload" accept="image/*" style="display:none;">
+                        <button class="profile-upload-btn" id="change-pic-btn"><i class="fa-solid fa-image"></i> Change Picture</button>
+                        <div id="profile-info"></div>
+                    </div>
+                </section>
+            </main>
+            <footer class="site-footer glass">
+               
+                <div class="footer-links">
+                    <a href="about.html">About</a> |
+                    <a href="help.html">Help</a> |
+                    <a href="settings.html">Settings</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script>
+    // Welcome message
+    const user = localStorage.getItem('currentUser') || '';
+    const welcomeDiv = document.getElementById('header-welcome');
+    if (welcomeDiv) welcomeDiv.textContent = user ? `Welcome, ${user}!` : '';
+    // Sidebar tooltips
+    [...document.querySelectorAll('.sidebar nav a')].forEach(link => {
+        link.title = link.textContent.trim();
+    });
+    // Responsive sidebar: icons only on small screens
+    function updateSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (window.innerWidth <= 900) {
+            sidebar.classList.add('sidebar-icons-only');
+        } else {
+            sidebar.classList.remove('sidebar-icons-only');
+        }
+    }
+    window.addEventListener('resize', updateSidebar);
+    updateSidebar();
+    // Profile avatar logic
+    function getInitials(name) {
+        return name ? name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2) : '';
+    }
+    function getAvatarColor(name) {
+        // Simple hash to color
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        const color = `hsl(${hash % 360}, 70%, 70%)`;
+        return color;
+    }
+    function renderProfileAvatar() {
+        const user = localStorage.getItem('currentUser');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const data = users[user] && users[user].data ? users[user].data : {};
+        const avatarImg = document.getElementById('profile-avatar');
+        const usernameDiv = document.getElementById('profile-username');
+        usernameDiv.textContent = user || '';
+        if (data.profilePic) {
+            avatarImg.src = data.profilePic;
+            avatarImg.style.background = '#e0e7ef';
+        } else {
+            // Generate SVG avatar with initials
+            const initials = getInitials(user);
+            const color = getAvatarColor(user||'');
+            const svg = `<svg width='96' height='96' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='54%' text-anchor='middle' font-size='38' font-family='Inter,Arial,sans-serif' fill='#fff' dy='.1em'>${initials}</text></svg>`;
+            avatarImg.src = 'data:image/svg+xml;base64,' + btoa(svg);
+            avatarImg.style.background = color;
+        }
+    }
+    document.getElementById('change-pic-btn').onclick = function() {
+        document.getElementById('profile-pic-upload').click();
+    };
+    document.getElementById('profile-pic-upload').onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const user = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (users[user]) {
+                if (!users[user].data) users[user].data = {};
+                users[user].data.profilePic = ev.target.result;
+                localStorage.setItem('users', JSON.stringify(users));
+                renderProfileAvatar();
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+    renderProfileAvatar();
+    // Logout button logic
+    const logoutBtn = document.getElementById('logout-btn-header');
+    if (logoutBtn) {
+        logoutBtn.onclick = function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        };
+    }
+    // Render profile info (password change, logout)
+    if (typeof updateProfile === 'function') updateProfile();
+    </script>
+</body>
+</html> 

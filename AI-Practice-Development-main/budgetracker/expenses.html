@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar glass">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-coins"></i>
+                <span>Budget Tracker</span>
+            </div>
+            <nav>
+                <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="income.html" class="nav-link"><i class="fa-solid fa-money-bill-trend-up"></i> Income</a>
+                <a href="wallets.html" class="nav-link"><i class="fa-solid fa-piggy-bank"></i> Wallets</a>
+                <a href="expenses.html" class="nav-link active"><i class="fa-solid fa-receipt"></i> Expenses</a>
+                <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                <a href="export.html" class="nav-link"><i class="fa-solid fa-file-export"></i> Export/Import</a>
+                <a href="about.html" class="nav-link"><i class="fa-solid fa-circle-info"></i> About</a>
+                <a href="help.html" class="nav-link"><i class="fa-solid fa-question-circle"></i> Help</a>
+                <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="dashboard-header glass">
+                <div class="header-title" id="header-welcome">
+                    <!-- Welcome message will be set by JS -->
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <a href="dashboard.html" class="dark-toggle-btn" title="Back to Dashboard">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <button id="logout-btn-header" class="dark-toggle-btn" title="Log Out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+            <main>
+                <section id="expenses-section">
+                    <h2><i class="fa-solid fa-receipt"></i> Expenses</h2>
+                    <div id="notification-area" aria-live="polite"></div>
+                    <form id="expense-form">
+                        <input type="text" id="expense-name" placeholder="Expense Name" required aria-label="Expense Name">
+                        <input type="number" id="expense-amount" placeholder="Amount" min="0" required aria-label="Amount">
+                        <select id="expense-category" required aria-label="Category">
+                            <!-- Categories will be populated by JS for custom support -->
+                        </select>
+                        <input type="text" id="expense-notes" placeholder="Notes (optional)" aria-label="Notes">
+                        <select id="expense-frequency" aria-label="Recurring Frequency">
+                            <option value="none">One-time</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        <button type="submit"><i class="fa-solid fa-plus"></i> Add Expense</button>
+                    </form>
+                    <div class="expense-search-bar">
+                        <input type="text" id="expense-search" placeholder="Search or filter expenses..." aria-label="Search expenses">
+                    </div>
+                    <div class="expenses-group">
+                        <h3>Monthly Expenses</h3>
+                        <ul id="expense-list"></ul>
+                    </div>
+                    <div id="budget-section">
+                        <h3>Budgets</h3>
+                        <form id="budget-form">
+                            <select id="budget-category" aria-label="Budget Category"></select>
+                            <input type="number" id="budget-amount" placeholder="Budget Amount" min="0" required aria-label="Budget Amount">
+                            <button type="submit"><i class="fa-solid fa-plus"></i> Set Budget</button>
+                        </form>
+                    </div>
+                    <div id="custom-category-section">
+                        <h3>Custom Categories</h3>
+                        <ul id="custom-categories-list"></ul>
+                        <form id="custom-category-form">
+                            <input type="text" id="custom-category-name" placeholder="Category Name" required aria-label="Category Name">
+                            <input type="text" id="custom-category-icon" placeholder="Icon (FontAwesome)" required aria-label="Icon">
+                            <input type="color" id="custom-category-color" value="#6366f1" aria-label="Color">
+                            <button type="submit"><i class="fa-solid fa-plus"></i> Add Category</button>
+                        </form>
+                    </div>
+                    <div id="audit-log-section">
+                        <h3>Audit Log / History</h3>
+                        <ul id="audit-log-list"></ul>
+                        <button id="undo-last-action"><i class="fa-solid fa-rotate-left"></i> Undo Last</button>
+                    </div>
+                </section>
+            </main>
+            <footer class="site-footer glass">
+     
+                <div class="footer-links">
+                    <a href="about.html">About</a> |
+                    <a href="help.html">Help</a> |
+                    <a href="settings.html">Settings</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script>
+    // Welcome message
+    const user = localStorage.getItem('currentUser') || '';
+    const welcomeDiv = document.getElementById('header-welcome');
+    if (welcomeDiv) welcomeDiv.textContent = user ? `Welcome, ${user}!` : '';
+    // Sidebar tooltips
+    [...document.querySelectorAll('.sidebar nav a')].forEach(link => {
+        link.title = link.textContent.trim();
+    });
+    // Responsive sidebar: icons only on small screens
+    function updateSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (window.innerWidth <= 900) {
+            sidebar.classList.add('sidebar-icons-only');
+        } else {
+            sidebar.classList.remove('sidebar-icons-only');
+        }
+    }
+    window.addEventListener('resize', updateSidebar);
+    updateSidebar();
+    // Only render expenses
+    if (typeof renderExpense === 'function') renderExpense();
+    // Logout button logic
+    const logoutBtn = document.getElementById('logout-btn-header');
+    if (logoutBtn) {
+        logoutBtn.onclick = function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        };
+    }
+    </script>
+</body>
+</html> 

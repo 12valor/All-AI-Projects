@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUPV Math Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Form --> 
+    <div id="loginForm" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>TUPV Math Challenge</h1>
+                <p>Technological University of the Philippines - Visayas</p>
+            </div>
+            <form id="loginFormElement" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+            </form>
+            <div class="login-info">
+                <p><strong>Demo Account:</strong></p>
+                <p>Username: demo</p>
+                <p>Password: demo123</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                Don't have an account? <a href="signup.html" style="color: #800020; font-weight: 600;">Sign up here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="game-container" style="display: none;">
+        <header class="game-header">
+            <div class="header-top">
+                <h1>TUPV Math Challenge</h1>
+                <div class="user-info">
+                    <span id="currentUser">demo</span>
+                    <button id="logoutButton" class="logout-button">Logout</button>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Points</span>
+                    <span id="points" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Problems Solved</span>
+                    <span id="problemsSolved" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Level</span>
+                    <span id="level" class="stat-value">1</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="game-main">
+            <div class="game-content">
+                <div class="problem-section">
+                    <div class="problem-header">
+                        <h2>Current Problem</h2>
+                        <div class="difficulty-badge" id="difficultyBadge">Easy</div>
+                    </div>
+                    <div class="problem-display">
+                        <div class="problem-text" id="problemText">Solve: 2 + 3 = ?</div>
+                        <div class="problem-hint" id="problemHint">Hint: Basic addition</div>
+                    </div>
+                    <div class="answer-section">
+                        <input type="text" id="answerInput" placeholder="Enter your answer" class="answer-input">
+                        <button id="submitAnswer" class="submit-button">Submit Answer</button>
+                    </div>
+                    <div class="problem-stats">
+                        <span>Points per correct answer: <span id="pointsPerProblem">10</span></span>
+                        <span>Time bonus: <span id="timeBonus">+5</span> points</span>
+                    </div>
+                </div>
+
+                <div class="upgrades-section">
+                    <h2>Study Tools</h2>
+                    <div class="upgrades-grid" id="upgradesGrid">
+                        <!-- Upgrades will be generated here -->
+                    </div>
+                </div>
+
+                <div class="rebirth-section">
+                    <h2>Advancement</h2>
+                    <div class="rebirth-info">
+                        <p>Advance to the next level! You need <span id="rebirthRequirement">1000</span> points to advance.</p>
+                        <button id="rebirthButton" class="rebirth-button" disabled>Advance (0x)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaderboard-section">
+                <h2>TUPV Math Leaderboard</h2>
+                <div class="leaderboard" id="leaderboard">
+                    <!-- Leaderboard will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Database script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="database.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

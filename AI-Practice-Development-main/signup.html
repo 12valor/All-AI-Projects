@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUPV Math Challenge - Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>TUPV Math Challenge</h1>
+                <p>Create Your Student Account</p>
+            </div>
+
+            <div id="messageBox" style="display: none; padding: 15px; border-radius: 6px; margin-bottom: 20px; text-align: center;"></div>
+
+            <form id="signupForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="login-button" id="signupButton">Create Account</button>
+            </form>
+
+            <div class="login-info">
+                <p><strong>Account Requirements:</strong></p>
+                <p>• Username: 4-20 characters, unique</p>
+                <p>• Password: At least 6 characters</p>
+                <p>• All fields are required</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                Already have an account? <a href="index.html" style="color: #800020; font-weight: 600;">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:#fff; border-radius:10px; padding:40px 30px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.15); min-width:300px;">
+        <h2 style="color:#800020; margin-bottom:20px;">Account created successfully!</h2>
+        <button id="goToLoginBtn" class="login-button" style="width:180px;">Go to Login</button>
+      </div>
+    </div>
+
+    <!-- Move scripts to end of body -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="database.js"></script>
+    <script>
+        // Only declare tupvDatabase once at the top level
+        var tupvDatabase = null;
+        const signupButton = document.getElementById('signupButton');
+        signupButton.disabled = true;
+        document.addEventListener('sqljs-ready', () => {
+            tupvDatabase = new TUPVDatabase();
+            const checkReady = setInterval(() => {
+                if (tupvDatabase && tupvDatabase.isInitialized === true) {
+                    clearInterval(checkReady);
+                    signupButton.disabled = false;
+                }
+            }, 100);
+        });
+
+        function showMessage(message, isError = false) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            if (isError) {
+                messageBox.style.backgroundColor = '#f8d7da';
+                messageBox.style.color = '#721c24';
+                messageBox.style.border = '1px solid #f5c6cb';
+            } else {
+                messageBox.style.backgroundColor = '#d4edda';
+                messageBox.style.color = '#155724';
+                messageBox.style.border = '1px solid #c3e6cb';
+            }
+        }
+        function hideMessage() {
+            document.getElementById('messageBox').style.display = 'none';
+        }
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if (username.length < 4 || username.length > 20) {
+                showMessage('Username must be 4-20 characters long', true); return false;
+            }
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long', true); return false;
+            }
+            return true;
+        }
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            hideMessage();
+            if (!validateForm()) return;
+            if (!tupvDatabase || tupvDatabase.isInitialized !== true) {
+                showMessage('Database is not ready. Please wait and try again.', true);
+                console.error('Signup blocked: database not ready');
+                return;
+            }
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value
+            };
+            signupButton.disabled = true;
+            signupButton.textContent = 'Creating Account...';
+            try {
+                // No unique username check
+                const success = tupvDatabase.createUserAccount(formData);
+                if (success) {
+                    // Show modal
+                    document.getElementById('successModal').style.display = 'flex';
+                    document.getElementById('goToLoginBtn').onclick = function() {
+                        window.location.href = 'index.html';
+                    };
+                } else {
+                    showMessage('Failed to create account. Please try again.', true);
+                    signupButton.disabled = false;
+                    signupButton.textContent = 'Create Account';
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showMessage('An error occurred during signup. Please try again.', true);
+                signupButton.disabled = false;
+                signupButton.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html> 

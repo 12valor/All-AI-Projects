@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%);
+    }
+    .login-content {
+        background: rgba(255,255,255,0.85);
+        box-shadow: 0 4px 24px rgba(30,64,175,0.10);
+        border-radius: 8px;
+        padding: 40px 32px 32px 32px;
+        min-width: 320px;
+        max-width: 90vw;
+        text-align: center;
+    }
+    .login-content h1 {
+        margin-bottom: 24px;
+        font-size: 2rem;
+        color: #6366f1;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+    .login-content form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        align-items: stretch;
+    }
+    .login-content label {
+        text-align: left;
+        font-weight: 600;
+        color: #334155;
+    }
+    .login-content input, .login-content button {
+        font-size: 1rem;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+    }
+    .login-content button {
+        background: linear-gradient(90deg, #6366f1 60%, #06b6d4 100%);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.2s;
+    }
+    .login-content button:hover {
+        background: linear-gradient(90deg, #06b6d4 60%, #6366f1 100%);
+    }
+    .login-demo-msg {
+        margin: 12px 0 0 0;
+        color: #6366f1;
+        font-size: 1rem;
+    }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-content glass">
+            <h1><i class="fa-solid fa-coins"></i> Budget Tracker</h1>
+            <form id="login-form" aria-label="Login form">
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" required autocomplete="username">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required autocomplete="current-password">
+                <button type="submit"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+            </form>
+            <div id="login-demo-msg" class="login-demo-msg"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+    // Redirect if already logged in
+    if (localStorage.getItem('currentUser')) {
+        window.location.href = 'dashboard.html';
+    }
+    // Add demo users if not present
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    let demoMsg = '';
+    if (!users['demo']) {
+        users['demo'] = { password: 'demo', data: {} };
+        demoMsg += 'Demo user: <b>demo/demo</b><br>';
+    }
+    if (!users['AGDIAZ']) {
+        users['AGDIAZ'] = { password: '123456', data: {} };
+        demoMsg += 'Demo user: <b>AGDIAZ/123456</b>';
+    }
+    localStorage.setItem('users', JSON.stringify(users));
+    if (demoMsg) {
+        document.getElementById('login-demo-msg').innerHTML = demoMsg;
+    }
+    // Setup login form
+    document.getElementById('login-form').onsubmit = function(e) {
+        e.preventDefault();
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const u = document.getElementById('login-username').value;
+        const p = document.getElementById('login-password').value;
+        if (users[u] && users[u].password === p) {
+            localStorage.setItem('currentUser', u);
+            window.location.href = 'dashboard.html';
+        } else {
+            alert('Invalid credentials');
+        }
+    };
+    </script>
+</body>
+</html> 
