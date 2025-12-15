@@ -3,131 +3,284 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Budget Tracker</title>
+  <title>Smart Budget Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    /* Smooth transition for list items */
+    .list-item {
+      transition: all 0.2s ease-in-out;
+    }
+    .list-item:hover {
+      transform: translateY(-2px);
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen p-6 text-gray-800">
-  <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-8 space-y-10">
-    <h1 class="text-4xl font-bold text-center text-purple-700">💰 Budget & Expense Tracker</h1>
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
 
-    <!-- Wallet Section -->
-    <section>
-      <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">➕ Add E-Wallet</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input id="walletName" class="p-3 border rounded-lg shadow-sm" type="text" placeholder="e.g. GCash, Maya" />
-        <input id="walletAmount" class="p-3 border rounded-lg shadow-sm" type="number" placeholder="Amount" />
-        <button onclick="addWallet()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold">Add Wallet</button>
+  <nav class="bg-indigo-600 text-white p-6 shadow-lg mb-8">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-wallet text-2xl"></i>
+        <h1 class="text-2xl font-bold tracking-tight">FinTrack</h1>
       </div>
-      <div id="walletList" class="grid gap-4 md:grid-cols-2 mt-4"></div>
-    </section>
-
-    <!-- Divider -->
-    <hr class="my-8 border-gray-300"/>
-
-    <!-- Expense Section -->
-    <section>
-      <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">🧾 Add Monthly Expense</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input id="expenseName" class="p-3 border rounded-lg shadow-sm" type="text" placeholder="e.g. Rent, Netflix" />
-        <input id="expenseAmount" class="p-3 border rounded-lg shadow-sm" type="number" placeholder="Amount" />
-        <button onclick="addExpense()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">Add Expense</button>
+      <div class="text-indigo-100 text-sm font-medium bg-indigo-700 px-3 py-1 rounded-full">
+        v2.0
       </div>
-      <div id="expenseList" class="grid gap-4 md:grid-cols-2 mt-4"></div>
-    </section>
+    </div>
+  </nav>
 
-    <!-- Summary Section -->
-    <section>
-      <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">📊 Summary</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div class="bg-green-100 border border-green-300 p-4 rounded-lg shadow">
-          <h4 class="font-semibold text-green-800">Total Wallet Money</h4>
-          <p class="text-xl font-bold text-green-700">₱<span id="summaryTotal">0.00</span></p>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <i class="fa-solid fa-scale-balanced text-6xl text-indigo-600"></i>
         </div>
-        <div class="bg-red-100 border border-red-300 p-4 rounded-lg shadow">
-          <h4 class="font-semibold text-red-800">Total Monthly Expenses</h4>
-          <p class="text-xl font-bold text-red-700">₱<span id="summaryExpenses">0.00</span></p>
+        <p class="text-slate-500 font-medium mb-1">Remaining Balance</p>
+        <h2 class="text-3xl font-bold text-slate-800">₱<span id="summaryBalance">0.00</span></h2>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <i class="fa-solid fa-circle-arrow-up text-6xl text-emerald-500"></i>
         </div>
-        <div class="bg-yellow-100 border border-yellow-300 p-4 rounded-lg shadow">
-          <h4 class="font-semibold text-yellow-800">Remaining Balance</h4>
-          <p class="text-xl font-bold text-yellow-700">₱<span id="summaryBalance">0.00</span></p>
+        <p class="text-slate-500 font-medium mb-1">Total Assets</p>
+        <h2 class="text-3xl font-bold text-emerald-600">₱<span id="summaryTotal">0.00</span></h2>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <i class="fa-solid fa-circle-arrow-down text-6xl text-rose-500"></i>
         </div>
+        <p class="text-slate-500 font-medium mb-1">Monthly Expenses</p>
+        <h2 class="text-3xl font-bold text-rose-600">₱<span id="summaryExpenses">0.00</span></h2>
       </div>
     </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-700"><i class="fa-solid fa-money-bill-wave mr-2 text-indigo-500"></i> E-Wallets & Banks</h3>
+          </div>
+          
+          <div class="p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input id="walletName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition" type="text" placeholder="Source (e.g. GCash)" />
+              <input id="walletAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition" type="number" placeholder="Amount" />
+              <button onclick="addWallet()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+
+            <div id="walletList" class="space-y-3 mt-4 max-h-[400px] overflow-y-auto pr-1">
+              <div class="text-center text-slate-400 py-8 text-sm italic">No wallets added yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-700"><i class="fa-solid fa-receipt mr-2 text-rose-500"></i> Monthly Expenses</h3>
+          </div>
+
+          <div class="p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input id="expenseName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2.5 outline-none transition" type="text" placeholder="Bill (e.g. Netflix)" />
+              <input id="expenseAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2.5 outline-none transition" type="number" placeholder="Amount" />
+              <button onclick="addExpense()" class="bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+
+            <div id="expenseList" class="space-y-3 mt-4 max-h-[400px] overflow-y-auto pr-1">
+               <div class="text-center text-slate-400 py-8 text-sm italic">No expenses added yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <!-- JavaScript -->
   <script>
-    const wallets = [];
-    const expenses = [];
+    let wallets = [];
+    let expenses = [];
+
+    // Helper to format currency
+    const formatCurrency = (num) => {
+      return num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
 
     function updateWalletDisplay() {
       const walletList = document.getElementById('walletList');
       const summaryTotal = document.getElementById('summaryTotal');
+      
       walletList.innerHTML = '';
       let total = 0;
-      wallets.forEach(wallet => {
-        total += wallet.amount;
-        walletList.innerHTML += `
-          <div class="bg-purple-100 p-4 rounded-lg shadow-md border border-purple-200">
-            <h3 class="text-lg font-semibold text-purple-800">${wallet.name}</h3>
-            <p class="text-lg">₱${wallet.amount.toFixed(2)}</p>
-          </div>`;
-      });
-      summaryTotal.textContent = total.toFixed(2);
+
+      if (wallets.length === 0) {
+        walletList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">No wallets added yet.</div>';
+      } else {
+        wallets.forEach((wallet, index) => {
+          total += wallet.amount;
+          walletList.innerHTML += `
+            <div class="list-item bg-white border border-slate-100 p-4 rounded-xl flex justify-between items-center shadow-sm hover:shadow-md">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-700">${wallet.name}</h4>
+                  <p class="text-xs text-slate-400">Source</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="font-bold text-emerald-600">+ ₱${formatCurrency(wallet.amount)}</span>
+                <button onclick="deleteWallet(${index})" class="text-slate-300 hover:text-rose-500 transition-colors">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>`;
+        });
+      }
+      summaryTotal.textContent = formatCurrency(total);
       updateBalance();
     }
 
     function addWallet() {
-      const name = document.getElementById('walletName').value.trim();
-      const amount = parseFloat(document.getElementById('walletAmount').value);
-      if (name && !isNaN(amount)) {
+      const nameIn = document.getElementById('walletName');
+      const amountIn = document.getElementById('walletAmount');
+      const name = nameIn.value.trim();
+      const amount = parseFloat(amountIn.value);
+
+      if (name && !isNaN(amount) && amount > 0) {
         wallets.push({ name, amount });
-        document.getElementById('walletName').value = '';
-        document.getElementById('walletAmount').value = '';
+        nameIn.value = '';
+        amountIn.value = '';
         updateWalletDisplay();
+      } else {
+        alert("Please enter a valid name and amount.");
       }
+    }
+
+    function deleteWallet(index) {
+      wallets.splice(index, 1);
+      updateWalletDisplay();
     }
 
     function updateExpenseDisplay() {
       const expenseList = document.getElementById('expenseList');
       const summaryExpenses = document.getElementById('summaryExpenses');
+      
       expenseList.innerHTML = '';
       let totalExpense = 0;
-      expenses.forEach(exp => {
-        totalExpense += exp.amount;
-        expenseList.innerHTML += `
-          <div class="bg-blue-100 p-4 rounded-lg shadow-md border border-blue-200">
-            <h3 class="text-lg font-semibold text-blue-800">${exp.name}</h3>
-            <p>₱${exp.amount.toFixed(2)} <span class="text-sm text-gray-600">(monthly)</span></p>
-          </div>`;
-      });
-      summaryExpenses.textContent = totalExpense.toFixed(2);
+
+      if (expenses.length === 0) {
+        expenseList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">No expenses added yet.</div>';
+      } else {
+        expenses.forEach((exp, index) => {
+          totalExpense += exp.amount;
+          expenseList.innerHTML += `
+            <div class="list-item bg-white border border-slate-100 p-4 rounded-xl flex justify-between items-center shadow-sm hover:shadow-md">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
+                  <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-700">${exp.name}</h4>
+                  <p class="text-xs text-slate-400">Monthly Bill</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="font-bold text-slate-700">₱${formatCurrency(exp.amount)}</span>
+                <button onclick="deleteExpense(${index})" class="text-slate-300 hover:text-rose-500 transition-colors">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>`;
+        });
+      }
+      summaryExpenses.textContent = formatCurrency(totalExpense);
       updateBalance();
     }
 
     function addExpense() {
-      const name = document.getElementById('expenseName').value.trim();
-      const amount = parseFloat(document.getElementById('expenseAmount').value);
-      if (name && !isNaN(amount)) {
+      const nameIn = document.getElementById('expenseName');
+      const amountIn = document.getElementById('expenseAmount');
+      const name = nameIn.value.trim();
+      const amount = parseFloat(amountIn.value);
+
+      if (name && !isNaN(amount) && amount > 0) {
         expenses.push({ name, amount });
-        document.getElementById('expenseName').value = '';
-        document.getElementById('expenseAmount').value = '';
+        nameIn.value = '';
+        amountIn.value = '';
         updateExpenseDisplay();
+      } else {
+        alert("Please enter a valid name and amount.");
       }
+    }
+
+    function deleteExpense(index) {
+      expenses.splice(index, 1);
+      updateExpenseDisplay();
     }
 
     function updateBalance() {
       const total = wallets.reduce((acc, w) => acc + w.amount, 0);
       const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
       const remaining = total - totalExpenses;
-      document.getElementById('summaryBalance').textContent = remaining.toFixed(2);
+      
+      const balanceEl = document.getElementById('summaryBalance');
+      balanceEl.textContent = formatCurrency(remaining);
+
+      // Color coding for balance
+      if (remaining < 0) {
+        balanceEl.parentElement.classList.remove('text-slate-800');
+        balanceEl.parentElement.classList.add('text-rose-600');
+      } else {
+        balanceEl.parentElement.classList.remove('text-rose-600');
+        balanceEl.parentElement.classList.add('text-slate-800');
+      }
     }
+    // 1. Load data when app starts
+function init() {
+  const storedWallets = localStorage.getItem('wallets');
+  const storedExpenses = localStorage.getItem('expenses');
+  
+  if (storedWallets) wallets = JSON.parse(storedWallets);
+  if (storedExpenses) expenses = JSON.parse(storedExpenses);
+  
+  updateWalletDisplay();
+  updateExpenseDisplay();
+}
+
+// 2. Save data helper
+function saveData() {
+  localStorage.setItem('wallets', JSON.stringify(wallets));
+  localStorage.setItem('expenses', JSON.stringify(expenses));
+}
+
+// 3. Update your add/delete functions to call saveData()
+function addWallet() {
+  // ... existing code ...
+  wallets.push({ name, amount });
+  saveData(); // <--- Add this
+  updateWalletDisplay();
+}
   </script>
 </body>
 </html>
