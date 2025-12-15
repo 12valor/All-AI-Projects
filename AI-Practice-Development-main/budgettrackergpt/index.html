@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FinTrack / Type</title>
+  <title>FinTrack / Command</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,167 +12,152 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* Base Typography */
     body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #171717; }
     h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
     
-    /* Custom Scrollbar */
+    /* Thin Scrollbar for internal lists */
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #e5e5e5; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 4px; }
     
-    /* Utilities */
     .tracking-tightest { letter-spacing: -0.04em; }
-    .border-b-dashed { border-bottom-style: dashed; }
     
-    /* Button Hover Effect */
-    .btn-hover { transition: all 0.2s; }
-    .btn-hover:hover { transform: translateY(-1px); box-shadow: 2px 2px 0px black; }
-    .btn-active:active { transform: translateY(0px); box-shadow: 0px 0px 0px black; }
+    /* Filter Button State */
+    .filter-btn.active { background-color: black; color: white; border-color: black; }
   </style>
 </head>
-<body class="pb-12 px-4 sm:px-8 pt-6 sm:pt-10 max-w-7xl mx-auto">
+<body class="h-screen flex flex-col overflow-hidden bg-neutral-50">
 
-  <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 border-b-2 border-black pb-6">
-    <div>
-      <h1 class="text-4xl sm:text-6xl font-bold tracking-tightest uppercase leading-none">FinTrack.</h1>
-      <p class="text-neutral-500 font-medium mt-2">Personal Expense Dashboard</p>
+  <header class="flex justify-between items-center px-6 py-4 bg-white border-b border-neutral-200 shrink-0 z-10">
+    <div class="flex items-center gap-3">
+      <h1 class="text-2xl font-bold tracking-tightest uppercase">FinTrack.</h1>
+      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-100 text-neutral-500 uppercase tracking-widest">Dashboard v5</span>
     </div>
-    
-    <div class="flex gap-3">
-      <button onclick="exportToCSV()" class="border border-neutral-300 hover:border-black hover:bg-black hover:text-white px-5 py-2 text-sm font-semibold transition-colors duration-200">
-        Export CSV
-      </button>
-      <button onclick="clearAllData()" class="text-neutral-400 hover:text-red-600 px-3 py-2 text-sm font-semibold transition-colors">
-        Reset
-      </button>
+    <div class="flex gap-2">
+      <button onclick="exportToCSV()" class="text-xs font-bold uppercase tracking-wide hover:underline">Export</button>
+      <span class="text-neutral-300">|</span>
+      <button onclick="clearAllData()" class="text-xs font-bold uppercase tracking-wide text-red-500 hover:underline">Reset</button>
     </div>
   </header>
 
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
-    
-    <div class="md:col-span-5 flex flex-col justify-between">
-      <div>
-        <span class="text-sm font-semibold text-neutral-400 uppercase tracking-widest">Net Balance</span>
-        <div class="relative mt-2">
-          <h2 class="text-6xl sm:text-8xl font-bold tracking-tighter text-black leading-none">
-            <span class="text-3xl align-top font-medium text-neutral-400">₱</span><span id="summaryBalance">0.00</span>
-          </h2>
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-neutral-200 overflow-hidden">
+
+    <section class="flex flex-col h-full bg-white">
+      <div class="p-6 border-b border-neutral-100 shrink-0">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+          <span class="w-2 h-2 bg-green-500 rounded-full"></span> Income
+        </h2>
+        <div class="flex border border-neutral-200 focus-within:border-black transition-all">
+          <input id="walletName" class="flex-1 p-2.5 text-sm bg-white outline-none font-medium placeholder-neutral-400" type="text" placeholder="Source (e.g. Salary)">
+          <div class="w-px bg-neutral-200"></div>
+          <input id="walletAmount" class="w-20 p-2.5 text-sm bg-white outline-none font-mono text-right placeholder-neutral-400" type="number" placeholder="0">
+          <button onclick="addWallet()" class="bg-black text-white px-3 font-bold text-xs uppercase hover:bg-neutral-800 transition-colors">Add</button>
         </div>
       </div>
       
-      <div class="mt-8">
-        <div class="flex justify-between items-end mb-2">
-           <label class="text-sm font-bold">Monthly Limit</label>
-           <div class="flex items-baseline gap-2">
-             <span class="text-xs text-neutral-400">EDIT</span>
-             <input type="number" id="budgetLimitInput" onchange="updateBudgetLimit()" class="w-20 text-right font-mono text-sm bg-transparent border-b border-neutral-200 focus:border-black outline-none transition-colors" placeholder="0.00">
-           </div>
+      <div id="walletList" class="flex-1 overflow-y-auto p-6 space-y-0">
         </div>
-        <div class="w-full h-1 bg-neutral-100">
-          <div id="budgetProgressBar" class="h-full bg-black transition-all duration-500" style="width: 0%"></div>
-        </div>
-        <div class="flex justify-between mt-2 font-mono text-xs text-neutral-400">
-          <span>SPENT: <span id="textSpent" class="text-black">0.00</span></span>
-          <span><span id="textPercent">0</span>%</span>
-        </div>
-      </div>
-    </div>
 
-    <div class="md:col-span-7 grid grid-cols-2 gap-px bg-neutral-200 border border-neutral-200">
-      <div class="bg-white p-6 sm:p-8 flex flex-col justify-between h-40 sm:h-auto">
-        <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">Total In</span>
-        <p class="text-3xl sm:text-4xl font-display font-semibold text-green-600 tracking-tight">
-          +<span id="summaryTotal">0.00</span>
-        </p>
+      <div class="p-4 bg-neutral-50 border-t border-neutral-200 shrink-0 flex justify-between items-center">
+        <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Income</span>
+        <span class="text-lg font-mono font-bold text-green-600">+<span id="summaryTotal">0.00</span></span>
       </div>
-      <div class="bg-white p-6 sm:p-8 flex flex-col justify-between h-40 sm:h-auto">
-        <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Out</span>
-        <p class="text-3xl sm:text-4xl font-display font-semibold text-red-600 tracking-tight">
-          -<span id="summaryExpenses">0.00</span>
-        </p>
-      </div>
-      <div class="col-span-2 bg-white p-6 sm:p-8 relative">
-        <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Distribution</span>
-        <div class="h-40 w-full flex items-center justify-center">
-          <canvas id="expenseChart"></canvas>
-          <div id="chartEmptyState" class="absolute inset-0 flex items-center justify-center text-neutral-300 font-display text-2xl font-bold uppercase pointer-events-none">
-            No Data
+    </section>
+
+
+    <section class="flex flex-col h-full bg-white relative z-0">
+      <div class="p-6 border-b border-neutral-100 shrink-0">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+          <span class="w-2 h-2 bg-red-500 rounded-full"></span> Expenses
+        </h2>
+
+        <div class="flex gap-2 overflow-x-auto pb-3 mb-1 no-scrollbar">
+          <button onclick="setFilter('All')" class="filter-btn active border border-neutral-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors whitespace-nowrap">All</button>
+          <button onclick="setFilter('Food')" class="filter-btn border border-neutral-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide hover:border-black transition-colors whitespace-nowrap">Food</button>
+          <button onclick="setFilter('Transport')" class="filter-btn border border-neutral-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide hover:border-black transition-colors whitespace-nowrap">Transport</button>
+          <button onclick="setFilter('Utilities')" class="filter-btn border border-neutral-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide hover:border-black transition-colors whitespace-nowrap">Utilities</button>
+        </div>
+
+        <div class="border border-neutral-200 focus-within:border-black transition-all">
+          <div class="flex border-b border-neutral-100">
+            <input id="expenseName" class="flex-1 p-2.5 text-sm bg-white outline-none font-medium placeholder-neutral-400" type="text" placeholder="Description">
+            <div class="w-px bg-neutral-100"></div>
+            <select id="expenseCategory" class="p-2.5 bg-white outline-none font-medium text-xs text-neutral-500 cursor-pointer hover:text-black">
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Entertainment">Fun</option>
+              <option value="Shopping">Shop</option>
+              <option value="Others">Other</option>
+            </select>
+          </div>
+          <div class="flex">
+            <input id="expenseAmount" class="flex-1 p-2.5 text-sm bg-white outline-none font-mono placeholder-neutral-400" type="number" placeholder="0.00">
+            <button onclick="addExpense()" class="bg-black text-white px-4 font-bold text-xs uppercase hover:bg-neutral-800 transition-colors">Add</button>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+      <div id="expenseList" class="flex-1 overflow-y-auto p-6 space-y-0">
+        </div>
 
-    <div>
-      <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
-        <span class="w-2 h-2 bg-green-500 rounded-full"></span> Income
-      </h3>
-      
-      <div class="flex gap-0 mb-8 border border-neutral-200 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all">
-        <input id="walletName" class="flex-1 p-3 bg-white outline-none font-medium placeholder-neutral-300" type="text" placeholder="Source">
-        <div class="w-px bg-neutral-200"></div>
-        <input id="walletAmount" class="w-24 p-3 bg-white outline-none font-mono text-right placeholder-neutral-300" type="number" placeholder="0.00">
-        <button onclick="addWallet()" class="bg-black text-white px-5 font-bold text-sm tracking-wide uppercase hover:bg-neutral-800 transition-colors">
-          Add
-        </button>
+      <div class="p-4 bg-neutral-50 border-t border-neutral-200 shrink-0 flex justify-between items-center">
+        <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Expense</span>
+        <span class="text-lg font-mono font-bold text-red-600">-<span id="summaryExpenses">0.00</span></span>
       </div>
+    </section>
 
-      <div id="walletList" class="space-y-0 border-t border-black">
-        </div>
-    </div>
 
-    <div>
-      <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
-        <span class="w-2 h-2 bg-red-500 rounded-full"></span> Expenses
-      </h3>
-      
-      <div class="mb-8 border border-neutral-200 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all bg-white">
-        <div class="flex border-b border-neutral-100">
-          <input id="expenseName" class="flex-1 p-3 bg-white outline-none font-medium placeholder-neutral-300" type="text" placeholder="Description">
-          <div class="w-px bg-neutral-100"></div>
-          <select id="expenseCategory" class="p-3 bg-white outline-none font-medium text-sm text-neutral-500 cursor-pointer hover:text-black transition-colors">
-            <option value="Food">Food</option>
-            <option value="Transport">Transport</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Entertainment">Fun</option>
-            <option value="Shopping">Shop</option>
-            <option value="Health">Health</option>
-            <option value="Others">Other</option>
-          </select>
+    <section class="flex flex-col h-full bg-neutral-50 overflow-y-auto">
+      <div class="p-8 space-y-8">
+        
+        <div>
+          <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">Net Balance</span>
+          <h2 class="text-5xl lg:text-6xl font-bold tracking-tighter text-black mt-2 leading-none">
+            <span class="text-2xl align-top font-medium text-neutral-400">₱</span><span id="summaryBalance">0.00</span>
+          </h2>
         </div>
-        <div class="flex">
-          <input id="expenseAmount" class="flex-1 p-3 bg-white outline-none font-mono placeholder-neutral-300" type="number" placeholder="0.00">
-          <button onclick="addExpense()" class="bg-black text-white px-6 font-bold text-sm tracking-wide uppercase hover:bg-neutral-800 transition-colors">
-            Add Entry
-          </button>
+
+        <div class="bg-white p-6 border border-neutral-200">
+          <div class="flex justify-between items-end mb-3">
+            <label class="text-sm font-bold" id="budgetStatusText">Monthly Budget</label>
+            <div class="flex items-baseline gap-1 border-b border-neutral-200 hover:border-black transition-colors">
+              <input type="number" id="budgetLimitInput" onchange="updateBudgetLimit()" class="w-20 text-right font-mono text-sm bg-transparent outline-none" placeholder="Set Limit">
+            </div>
+          </div>
+          <div class="w-full h-2 bg-neutral-100 mb-2">
+            <div id="budgetProgressBar" class="h-full bg-black transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-mono text-neutral-400 uppercase">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
         </div>
+
+        <div class="bg-white p-6 border border-neutral-200">
+          <span class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Spending Distribution</span>
+          <div class="h-48 w-full flex items-center justify-center relative">
+            <canvas id="expenseChart"></canvas>
+            <div id="chartEmptyState" class="absolute inset-0 flex items-center justify-center text-neutral-300 font-display text-xl font-bold uppercase pointer-events-none">No Data</div>
+          </div>
+        </div>
+
       </div>
+      
+      <div class="mt-auto p-6 text-center">
+         <p class="text-[10px] text-neutral-400 uppercase tracking-widest">FinTrack System</p>
+      </div>
+    </section>
 
-      <div id="expenseList" class="space-y-0 border-t border-black">
-        </div>
-    </div>
-
-  </div>
+  </main>
 
   <script>
-    // --- COLOR PALETTE (Swiss Style: Bold & High Contrast) ---
-    // Instead of icons, we use color tags
     const categoryConfig = {
-      'Food': '#000000',          // Black
-      'Transport': '#525252',     // Dark Gray
-      'Utilities': '#2563eb',     // Blue
-      'Entertainment': '#9333ea', // Purple
-      'Shopping': '#db2777',      // Pink
-      'Health': '#059669',        // Green
-      'Others': '#d4d4d4'         // Light Gray
+      'Food': '#171717', 'Transport': '#525252', 'Utilities': '#2563eb',
+      'Entertainment': '#9333ea', 'Shopping': '#db2777', 'Others': '#d4d4d4'
     };
-
-    let wallets = [];
-    let expenses = [];
-    let budgetLimit = 0;
-    let myChart = null;
+    
+    let wallets = [], expenses = [], budgetLimit = 0, myChart = null, currentFilter = 'All';
 
     window.onload = function() { loadData(); };
 
@@ -183,18 +168,13 @@
     }
 
     function loadData() {
-      const storedWallets = localStorage.getItem('wallets');
-      const storedExpenses = localStorage.getItem('expenses');
-      const storedLimit = localStorage.getItem('budgetLimit');
-
-      if (storedWallets) wallets = JSON.parse(storedWallets);
-      if (storedExpenses) expenses = JSON.parse(storedExpenses);
-      if (storedLimit) {
-        budgetLimit = parseFloat(storedLimit);
-        document.getElementById('budgetLimitInput').value = budgetLimit;
-      }
-      updateWalletDisplay();
-      updateExpenseDisplay();
+      const w = localStorage.getItem('wallets');
+      const e = localStorage.getItem('expenses');
+      const l = localStorage.getItem('budgetLimit');
+      if (w) wallets = JSON.parse(w);
+      if (e) expenses = JSON.parse(e);
+      if (l) { budgetLimit = parseFloat(l); document.getElementById('budgetLimitInput').value = budgetLimit; }
+      updateWalletDisplay(); updateExpenseDisplay();
     }
 
     function clearAllData() {
@@ -206,16 +186,13 @@
     }
 
     const formatCurrency = (num) => num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const getFormattedDate = () => {
-      const now = new Date();
-      return now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
+    const getFormattedDate = () => new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     function exportToCSV() {
-      if (expenses.length === 0 && wallets.length === 0) { alert("No data."); return; }
+      if (!expenses.length && !wallets.length) return alert("No data.");
       let csv = "data:text/csv;charset=utf-8,Type,Name,Category,Amount,Date\n";
-      wallets.forEach(row => csv += `Income,${row.name},Source,${row.amount},${row.date||'N/A'}\n`);
-      expenses.forEach(row => csv += `Expense,${row.name},${row.category},${row.amount},${row.date||'N/A'}\n`);
+      wallets.forEach(r => csv += `Income,${r.name},Source,${r.amount},${r.date}\n`);
+      expenses.forEach(r => csv += `Expense,${r.name},${r.category},${r.amount},${r.date}\n`);
       const link = document.createElement("a");
       link.setAttribute("href", encodeURI(csv));
       link.setAttribute("download", "fintrack_export.csv");
@@ -223,85 +200,74 @@
     }
 
     function updateBudgetLimit() {
-      const input = document.getElementById('budgetLimitInput');
-      budgetLimit = parseFloat(input.value) || 0;
+      budgetLimit = parseFloat(document.getElementById('budgetLimitInput').value) || 0;
       saveData(); updateProgressBar();
     }
 
     function updateProgressBar() {
-      const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
+      const total = expenses.reduce((acc, e) => acc + e.amount, 0);
       const bar = document.getElementById('budgetProgressBar');
-      document.getElementById('textSpent').textContent = formatCurrency(totalExpenses);
-      document.getElementById('textPercent').textContent = budgetLimit > 0 ? ((totalExpenses/budgetLimit)*100).toFixed(0) : "0";
-
-      if (budgetLimit === 0) { bar.style.width = '0%'; return; }
+      const label = document.getElementById('budgetStatusText');
       
-      const percentage = Math.min((totalExpenses / budgetLimit) * 100, 100);
-      bar.style.width = percentage + '%';
+      if (budgetLimit === 0) { bar.style.width = '0%'; label.textContent = "Monthly Budget"; return; }
       
-      // Minimalist color logic: Black (Normal) -> Red (Over)
-      if (totalExpenses > budgetLimit) bar.style.backgroundColor = '#dc2626'; // Red
-      else bar.style.backgroundColor = '#000000'; // Black
+      const pct = Math.min((total / budgetLimit) * 100, 100);
+      bar.style.width = pct + '%';
+      
+      if (total > budgetLimit) { bar.style.backgroundColor = '#dc2626'; label.innerHTML = `Over Budget <span class="text-red-600">(${pct.toFixed(0)}%)</span>`; }
+      else if (pct > 80) { bar.style.backgroundColor = '#f59e0b'; label.innerHTML = `Careful <span class="text-amber-600">(${pct.toFixed(0)}%)</span>`; }
+      else { bar.style.backgroundColor = '#000000'; label.innerHTML = `On Track <span class="text-green-600">(${pct.toFixed(0)}%)</span>`; }
     }
 
     function updateChart() {
       const ctx = document.getElementById('expenseChart').getContext('2d');
-      const emptyState = document.getElementById('chartEmptyState');
-      
       if (expenses.length === 0) {
         if (myChart) myChart.destroy();
-        emptyState.classList.remove('hidden'); return;
-      } else { emptyState.classList.add('hidden'); }
-
-      const categoryTotals = {};
+        document.getElementById('chartEmptyState').classList.remove('hidden'); return;
+      }
+      document.getElementById('chartEmptyState').classList.add('hidden');
+      
+      const totals = {};
       expenses.forEach(exp => {
-        if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
-        categoryTotals[exp.category] += exp.amount;
+        if (!totals[exp.category]) totals[exp.category] = 0;
+        totals[exp.category] += exp.amount;
       });
 
       if (myChart) myChart.destroy();
-      
-      // Swiss Chart Style: No borders, distinct colors
       myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: Object.keys(categoryTotals),
+          labels: Object.keys(totals),
           datasets: [{
-            data: Object.values(categoryTotals),
-            backgroundColor: Object.keys(categoryTotals).map(cat => categoryConfig[cat] || '#d4d4d4'),
-            borderWidth: 0,
-            hoverOffset: 0
+            data: Object.values(totals),
+            backgroundColor: Object.keys(totals).map(cat => categoryConfig[cat] || '#d4d4d4'),
+            borderWidth: 0
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          cutout: '65%'
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
       });
+    }
+
+    function setFilter(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === cat);
+      });
+      updateExpenseDisplay();
     }
 
     function updateWalletDisplay() {
       const list = document.getElementById('walletList');
       let total = 0;
       list.innerHTML = '';
-      if (wallets.length === 0) list.innerHTML = '<div class="py-6 text-neutral-400 text-sm font-mono uppercase">Empty</div>';
+      if (!wallets.length) list.innerHTML = '<div class="text-neutral-300 text-xs font-mono uppercase text-center py-10">No Income Data</div>';
       else {
-        wallets.slice().reverse().forEach((wallet, index) => {
-          total += wallet.amount;
+        wallets.slice().reverse().forEach((w, i) => {
+          total += w.amount;
           list.innerHTML += `
-            <div class="group flex justify-between items-baseline py-4 border-b border-neutral-100 hover:bg-neutral-50 transition-colors px-2 -mx-2">
-              <div>
-                <h4 class="font-bold text-lg leading-none">${wallet.name}</h4>
-                <p class="text-xs font-mono text-neutral-400 mt-1 uppercase tracking-wide">${wallet.date || '—'}</p>
-              </div>
-              <div class="flex items-center gap-4">
-                <span class="font-mono font-medium text-green-600">+${formatCurrency(wallet.amount)}</span>
-                <button onclick="deleteWallet(${wallets.length - 1 - index})" class="text-xs font-bold uppercase text-neutral-300 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity">
-                  Remove
-                </button>
-              </div>
+            <div class="group flex justify-between items-center py-3 border-b border-neutral-100 hover:bg-neutral-50 px-2 -mx-2 transition">
+              <div><h4 class="font-bold text-sm">${w.name}</h4><p class="text-[10px] text-neutral-400 font-mono uppercase">${w.date}</p></div>
+              <div class="flex items-center gap-2"><span class="font-mono text-sm text-green-600 font-bold">+${formatCurrency(w.amount)}</span><button onclick="deleteWallet(${wallets.length-1-i})" class="text-[10px] uppercase font-bold text-neutral-300 hover:text-black opacity-0 group-hover:opacity-100">Del</button></div>
             </div>`;
         });
       }
@@ -313,66 +279,48 @@
       const list = document.getElementById('expenseList');
       let total = 0;
       list.innerHTML = '';
-      if (expenses.length === 0) list.innerHTML = '<div class="py-6 text-neutral-400 text-sm font-mono uppercase">Empty</div>';
+      const filtered = currentFilter === 'All' ? expenses : expenses.filter(e => e.category === currentFilter);
+      
+      if (!filtered.length) list.innerHTML = '<div class="text-neutral-300 text-xs font-mono uppercase text-center py-10">No Expenses</div>';
       else {
-        expenses.slice().reverse().forEach((exp, index) => {
-          total += exp.amount;
-          // Use a colored square instead of an icon
-          const color = categoryConfig[exp.category] || '#d4d4d4';
-          
+        filtered.slice().reverse().forEach((e) => {
+          const originalIndex = expenses.indexOf(e);
+          total += e.amount;
+          const color = categoryConfig[e.category] || '#d4d4d4';
           list.innerHTML += `
-            <div class="group flex justify-between items-center py-4 border-b border-neutral-100 hover:bg-neutral-50 transition-colors px-2 -mx-2">
-              <div class="flex items-baseline gap-3">
-                <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background-color: ${color}"></div>
-                <div>
-                  <h4 class="font-semibold text-base leading-none">${exp.name}</h4>
-                  <div class="flex gap-2 mt-1">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">${exp.category}</span>
-                    <span class="text-[10px] font-mono text-neutral-300">${exp.date || ''}</span>
-                  </div>
-                </div>
+            <div class="group flex justify-between items-center py-3 border-b border-neutral-100 hover:bg-neutral-50 px-2 -mx-2 transition">
+              <div class="flex items-center gap-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-black shrink-0" style="background-color: ${color}"></div>
+                <div><h4 class="font-bold text-sm">${e.name}</h4><div class="flex gap-2"><span class="text-[10px] text-neutral-400 font-bold uppercase">${e.category}</span><span class="text-[10px] text-neutral-300 font-mono">${e.date}</span></div></div>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="font-mono font-medium text-black">${formatCurrency(exp.amount)}</span>
-                <button onclick="deleteExpense(${expenses.length - 1 - index})" class="text-xs font-bold uppercase text-neutral-300 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity">
-                  Remove
-                </button>
-              </div>
+              <div class="flex items-center gap-2"><span class="font-mono text-sm font-medium">${formatCurrency(e.amount)}</span><button onclick="deleteExpense(${originalIndex})" class="text-[10px] uppercase font-bold text-neutral-300 hover:text-black opacity-0 group-hover:opacity-100">Del</button></div>
             </div>`;
         });
       }
-      document.getElementById('summaryExpenses').textContent = formatCurrency(total);
+      const allTotal = expenses.reduce((a,b)=>a+b.amount,0);
+      document.getElementById('summaryExpenses').textContent = formatCurrency(allTotal);
       updateBalance(); updateChart(); updateProgressBar();
     }
 
     function addWallet() {
-      const name = document.getElementById('walletName').value.trim();
-      const amount = parseFloat(document.getElementById('walletAmount').value);
-      if (name && !isNaN(amount) && amount > 0) {
-        wallets.push({ name, amount, date: getFormattedDate() });
-        document.getElementById('walletName').value = ''; document.getElementById('walletAmount').value = '';
-        saveData(); updateWalletDisplay();
-      }
+      const n = document.getElementById('walletName').value.trim();
+      const a = parseFloat(document.getElementById('walletAmount').value);
+      if (n && a > 0) { wallets.push({ name: n, amount: a, date: getFormattedDate() }); document.getElementById('walletName').value=''; document.getElementById('walletAmount').value=''; saveData(); updateWalletDisplay(); }
     }
     function deleteWallet(i) { wallets.splice(i, 1); saveData(); updateWalletDisplay(); }
 
     function addExpense() {
-      const name = document.getElementById('expenseName').value.trim();
-      const cat = document.getElementById('expenseCategory').value;
-      const amount = parseFloat(document.getElementById('expenseAmount').value);
-      if (name && !isNaN(amount) && amount > 0) {
-        expenses.push({ name, category: cat, amount, date: getFormattedDate() });
-        document.getElementById('expenseName').value = ''; document.getElementById('expenseAmount').value = '';
-        saveData(); updateExpenseDisplay();
-      }
+      const n = document.getElementById('expenseName').value.trim();
+      const c = document.getElementById('expenseCategory').value;
+      const a = parseFloat(document.getElementById('expenseAmount').value);
+      if (n && a > 0) { expenses.push({ name: n, category: c, amount: a, date: getFormattedDate() }); document.getElementById('expenseName').value=''; document.getElementById('expenseAmount').value=''; saveData(); updateExpenseDisplay(); }
     }
     function deleteExpense(i) { expenses.splice(i, 1); saveData(); updateExpenseDisplay(); }
 
     function updateBalance() {
-      const total = wallets.reduce((acc, w) => acc + w.amount, 0);
-      const exp = expenses.reduce((acc, e) => acc + e.amount, 0);
-      const rem = total - exp;
-      document.getElementById('summaryBalance').textContent = formatCurrency(rem);
+      const t = wallets.reduce((a, w) => a + w.amount, 0);
+      const e = expenses.reduce((a, x) => a + x.amount, 0);
+      document.getElementById('summaryBalance').textContent = formatCurrency(t - e);
     }
   </script>
 </body>
