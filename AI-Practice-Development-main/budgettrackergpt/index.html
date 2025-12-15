@@ -3,104 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Budget Tracker v2.5</title>
+  <title>FinTrack Compact v4.0</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .list-item { transition: all 0.2s ease-in-out; }
-    .list-item:hover { transform: translateY(-2px); }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .progress-bar { transition: width 0.5s ease-in-out, background-color 0.3s; }
   </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-6 text-sm">
 
-  <nav class="bg-indigo-600 text-white p-6 shadow-lg mb-8">
+  <nav class="bg-indigo-600 text-white p-3 shadow-md mb-4 sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-wallet text-2xl"></i>
-        <h1 class="text-2xl font-bold tracking-tight">FinTrack <span class="text-indigo-300 text-base font-normal">| Dashboard</span></h1>
+      <div class="flex items-center gap-2">
+        <div class="bg-white/10 p-1.5 rounded">
+          <i class="fa-solid fa-wallet text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight leading-none">FinTrack <span class="text-indigo-300 font-normal">Compact</span></h1>
+        </div>
+      </div>
+      
+      <div class="flex gap-2">
+        <button onclick="exportToCSV()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded transition font-medium flex items-center gap-1">
+          <i class="fa-solid fa-file-excel"></i> Export
+        </button>
+        <button onclick="clearAllData()" class="text-xs bg-indigo-700 hover:bg-indigo-800 text-indigo-100 px-3 py-1.5 rounded transition font-medium">
+          Reset
+        </button>
       </div>
     </div>
   </nav>
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+  <div class="max-w-6xl mx-auto px-3">
     
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-        <div class="absolute right-0 top-0 p-4 opacity-10">
-          <i class="fa-solid fa-scale-balanced text-6xl text-indigo-600"></i>
-        </div>
-        <p class="text-slate-500 font-medium mb-1">Remaining Balance</p>
-        <h2 class="text-3xl font-bold text-slate-800">₱<span id="summaryBalance">0.00</span></h2>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-        <div class="absolute right-0 top-0 p-4 opacity-10">
-          <i class="fa-solid fa-circle-arrow-up text-6xl text-emerald-500"></i>
-        </div>
-        <p class="text-slate-500 font-medium mb-1">Total Assets</p>
-        <h2 class="text-3xl font-bold text-emerald-600">₱<span id="summaryTotal">0.00</span></h2>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-        <div class="absolute right-0 top-0 p-4 opacity-10">
-          <i class="fa-solid fa-circle-arrow-down text-6xl text-rose-500"></i>
-        </div>
-        <p class="text-slate-500 font-medium mb-1">Total Expenses</p>
-        <h2 class="text-3xl font-bold text-rose-600">₱<span id="summaryExpenses">0.00</span></h2>
-      </div>
-    </section>
-
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8">
-      <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
-        <i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i> Expense Breakdown
-      </h3>
-      <div class="relative h-64 w-full flex justify-center items-center">
-        <canvas id="expenseChart"></canvas>
-        <div id="chartEmptyState" class="absolute text-slate-400 text-sm italic hidden">
-          Add expenses to see analytics
-        </div>
-      </div>
-    </section>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       
-      <div class="space-y-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h3 class="text-lg font-bold text-slate-700">E-Wallets & Banks</h3>
+      <div class="space-y-4">
+        <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-bullseye text-rose-500"></i> Monthly Budget
+            </h3>
+            <input type="number" id="budgetLimitInput" onchange="updateBudgetLimit()" class="w-24 bg-slate-50 border border-slate-200 rounded px-2 py-0.5 text-xs focus:ring-rose-500 outline-none text-right" placeholder="Set Limit">
           </div>
-          <div class="p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row gap-3">
-              <input id="walletName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-indigo-500" type="text" placeholder="Source (e.g. GCash)" />
-              <input id="walletAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-indigo-500" type="number" placeholder="Amount" />
-              <button onclick="addWallet()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm px-5 py-2.5"><i class="fa-solid fa-plus"></i></button>
+          <div class="w-full bg-slate-100 rounded-full h-4 relative overflow-hidden">
+            <div id="budgetProgressBar" class="progress-bar bg-emerald-500 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center whitespace-nowrap px-2" style="width: 0%">
+              0%
             </div>
-            <div id="walletList" class="space-y-3 mt-4 max-h-[300px] overflow-y-auto pr-1"></div>
           </div>
+          <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-medium">
+            <span>Spent: <span id="textSpent" class="text-slate-700">₱0.00</span></span>
+            <span>Limit: <span id="textLimit" class="text-slate-700">₱0.00</span></span>
+          </div>
+        </section>
+
+        <div class="grid grid-cols-2 md:grid-cols-1 gap-2">
+          <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden col-span-2 md:col-span-1">
+            <div class="absolute right-0 top-0 p-2 opacity-10">
+              <i class="fa-solid fa-scale-balanced text-4xl text-indigo-600"></i>
+            </div>
+            <p class="text-slate-500 font-bold text-[10px] uppercase">Net Balance</p>
+            <h2 class="text-2xl font-bold text-slate-800">₱<span id="summaryBalance">0.00</span></h2>
+          </div>
+          <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
+             <p class="text-slate-500 font-bold text-[10px] uppercase">Total Income</p>
+             <h2 class="text-lg font-bold text-emerald-600">₱<span id="summaryTotal">0.00</span></h2>
+          </div>
+          <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
+             <p class="text-slate-500 font-bold text-[10px] uppercase">Total Expenses</p>
+             <h2 class="text-lg font-bold text-rose-600">₱<span id="summaryExpenses">0.00</span></h2>
+          </div>
+        </div>
+
+        <section class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="font-bold text-slate-700 text-xs uppercase mb-2">Analytics</h3>
+          <div class="relative h-40 w-full flex justify-center items-center">
+            <canvas id="expenseChart"></canvas>
+            <div id="chartEmptyState" class="absolute text-slate-400 text-xs italic hidden">
+              No Data
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="md:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-140px)] md:h-auto">
+        <div class="p-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <h3 class="font-bold text-slate-700 text-xs uppercase">Income</h3>
+          <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded font-bold">IN</span>
+        </div>
+        <div class="p-3 space-y-2 flex-1 flex flex-col overflow-hidden">
+          <div class="flex gap-2">
+            <input id="walletName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded p-2 outline-none focus:border-indigo-500" type="text" placeholder="Source" />
+            <input id="walletAmount" class="w-20 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded p-2 outline-none focus:border-indigo-500" type="number" placeholder="Amt" />
+            <button onclick="addWallet()" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1 transition">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div id="walletList" class="space-y-2 overflow-y-auto flex-1 pr-1"></div>
         </div>
       </div>
 
-      <div class="space-y-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h3 class="text-lg font-bold text-slate-700">Expenses</h3>
-          </div>
-          <div class="p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row gap-3">
-              <input id="expenseName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-rose-500" type="text" placeholder="Bill (e.g. Netflix)" />
-              <input id="expenseAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-rose-500" type="number" placeholder="Amount" />
-              <button onclick="addExpense()" class="bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg text-sm px-5 py-2.5"><i class="fa-solid fa-plus"></i></button>
+      <div class="md:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-140px)] md:h-auto">
+        <div class="p-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <h3 class="font-bold text-slate-700 text-xs uppercase">Expenses</h3>
+          <span class="bg-rose-100 text-rose-700 text-[10px] px-1.5 py-0.5 rounded font-bold">OUT</span>
+        </div>
+        <div class="p-3 space-y-2 flex-1 flex flex-col overflow-hidden">
+          <div class="flex flex-col gap-2">
+            <div class="flex gap-2">
+              <input id="expenseName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded p-2 outline-none focus:border-rose-500" type="text" placeholder="Item" />
+              <input id="expenseAmount" class="w-20 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded p-2 outline-none focus:border-rose-500" type="number" placeholder="Amt" />
             </div>
-            <div id="expenseList" class="space-y-3 mt-4 max-h-[300px] overflow-y-auto pr-1"></div>
+            <div class="flex gap-2">
+              <select id="expenseCategory" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded p-2 outline-none focus:border-rose-500">
+                <option value="Food">🍔 Food</option>
+                <option value="Transport">🚗 Transpo</option>
+                <option value="Utilities">⚡ Utility</option>
+                <option value="Entertainment">🎬 Fun</option>
+                <option value="Shopping">🛍️ Shop</option>
+                <option value="Health">💊 Health</option>
+                <option value="Others">📦 Other</option>
+              </select>
+              <button onclick="addExpense()" class="w-20 bg-rose-500 hover:bg-rose-600 text-white rounded px-3 py-1 transition font-medium text-xs">
+                Add
+              </button>
+            </div>
           </div>
+          
+          <div id="expenseList" class="space-y-2 overflow-y-auto flex-1 pr-1"></div>
         </div>
       </div>
 
@@ -108,191 +148,225 @@
   </div>
 
   <script>
-    let wallets = [];
-    let expenses = [];
-    let myChart = null; // Variable to hold the chart instance
-
-    // Currency Formatter
-    const formatCurrency = (num) => {
-      return num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // --- CONFIGURATION ---
+    const categoryConfig = {
+      'Food': { color: '#ef4444', bg: '#fef2f2', icon: 'fa-utensils' },
+      'Transport': { color: '#f59e0b', bg: '#fffbeb', icon: 'fa-car' },
+      'Utilities': { color: '#3b82f6', bg: '#eff6ff', icon: 'fa-bolt' },
+      'Entertainment': { color: '#8b5cf6', bg: '#f5f3ff', icon: 'fa-film' },
+      'Shopping': { color: '#ec4899', bg: '#fdf2f8', icon: 'fa-bag-shopping' },
+      'Health': { color: '#14b8a6', bg: '#f0fdfa', icon: 'fa-heart-pulse' },
+      'Others': { color: '#64748b', bg: '#f8fafc', icon: 'fa-box' }
     };
 
-    // --- CHART LOGIC ---
+    let wallets = [];
+    let expenses = [];
+    let budgetLimit = 0;
+    let myChart = null;
+
+    window.onload = function() { loadData(); };
+
+    function saveData() {
+      localStorage.setItem('wallets', JSON.stringify(wallets));
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+      localStorage.setItem('budgetLimit', budgetLimit.toString());
+    }
+
+    function loadData() {
+      const storedWallets = localStorage.getItem('wallets');
+      const storedExpenses = localStorage.getItem('expenses');
+      const storedLimit = localStorage.getItem('budgetLimit');
+
+      if (storedWallets) wallets = JSON.parse(storedWallets);
+      if (storedExpenses) expenses = JSON.parse(storedExpenses);
+      if (storedLimit) {
+        budgetLimit = parseFloat(storedLimit);
+        document.getElementById('budgetLimitInput').value = budgetLimit;
+      }
+
+      updateWalletDisplay();
+      updateExpenseDisplay();
+    }
+
+    function clearAllData() {
+      if(confirm('Reset all data?')) {
+        wallets = []; expenses = []; budgetLimit = 0;
+        document.getElementById('budgetLimitInput').value = '';
+        saveData(); updateWalletDisplay(); updateExpenseDisplay();
+      }
+    }
+
+    const formatCurrency = (num) => num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const getFormattedDate = () => {
+      const now = new Date();
+      return now.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+    };
+
+    function exportToCSV() {
+      if (expenses.length === 0 && wallets.length === 0) { alert("No data!"); return; }
+      let csv = "data:text/csv;charset=utf-8,Type,Name,Category,Amount,Date\n";
+      wallets.forEach(row => csv += `Income,${row.name},Source,${row.amount},${row.date||'N/A'}\n`);
+      expenses.forEach(row => csv += `Expense,${row.name},${row.category},${row.amount},${row.date||'N/A'}\n`);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csv));
+      link.setAttribute("download", "fintrack_data.csv");
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function updateBudgetLimit() {
+      const input = document.getElementById('budgetLimitInput');
+      budgetLimit = parseFloat(input.value) || 0;
+      saveData(); updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
+      const bar = document.getElementById('budgetProgressBar');
+      document.getElementById('textSpent').textContent = "₱" + formatCurrency(totalExpenses);
+      document.getElementById('textLimit').textContent = "₱" + formatCurrency(budgetLimit);
+
+      if (budgetLimit === 0) {
+        bar.style.width = '0%'; bar.textContent = 'Set Limit';
+        bar.className = 'progress-bar bg-slate-300 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center';
+        return;
+      }
+
+      const percentage = Math.min((totalExpenses / budgetLimit) * 100, 100);
+      bar.style.width = percentage + '%'; bar.textContent = percentage.toFixed(0) + '%';
+      
+      if (percentage < 50) bar.className = 'progress-bar bg-emerald-500 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center';
+      else if (percentage < 85) bar.className = 'progress-bar bg-amber-400 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center';
+      else bar.className = 'progress-bar bg-rose-500 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center';
+    }
+
     function updateChart() {
       const ctx = document.getElementById('expenseChart').getContext('2d');
       const emptyState = document.getElementById('chartEmptyState');
       
-      // If no expenses, hide chart and show text
       if (expenses.length === 0) {
         if (myChart) myChart.destroy();
-        emptyState.classList.remove('hidden');
-        return;
-      } else {
-        emptyState.classList.add('hidden');
-      }
+        emptyState.classList.remove('hidden'); return;
+      } else { emptyState.classList.add('hidden'); }
 
-      const labels = expenses.map(e => e.name);
-      const data = expenses.map(e => e.amount);
+      const categoryTotals = {};
+      expenses.forEach(exp => {
+        if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
+        categoryTotals[exp.category] += exp.amount;
+      });
 
-      // Destroy old chart to prevent "glitch" or overlap
-      if (myChart) {
-        myChart.destroy();
-      }
-
+      if (myChart) myChart.destroy();
       myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels: Object.keys(categoryTotals),
           datasets: [{
-            label: 'Amount (₱)',
-            data: data,
-            backgroundColor: [
-              '#6366f1', // Indigo
-              '#ec4899', // Pink
-              '#10b981', // Emerald
-              '#f59e0b', // Amber
-              '#3b82f6', // Blue
-              '#8b5cf6', // Violet
-            ],
-            borderWidth: 2,
-            borderColor: '#ffffff'
+            data: Object.values(categoryTotals),
+            backgroundColor: Object.keys(categoryTotals).map(cat => categoryConfig[cat] ? categoryConfig[cat].color : '#94a3b8'),
+            borderWidth: 0,
+            hoverOffset: 5
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right' }
-          },
-          layout: { padding: 20 }
+          plugins: { legend: { display: false } }, // Hidden legend to save space
+          layout: { padding: 5 }
         }
       });
     }
 
-    // --- WALLET LOGIC ---
     function updateWalletDisplay() {
-      const walletList = document.getElementById('walletList');
-      const summaryTotal = document.getElementById('summaryTotal');
-      walletList.innerHTML = '';
+      const list = document.getElementById('walletList');
       let total = 0;
-
-      if (wallets.length === 0) {
-        walletList.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm italic">No wallets added yet.</div>';
-      } else {
-        wallets.forEach((wallet, index) => {
+      list.innerHTML = '';
+      if (wallets.length === 0) list.innerHTML = '<div class="text-center text-slate-400 py-4 text-xs italic">No data.</div>';
+      else {
+        wallets.slice().reverse().forEach((wallet, index) => {
           total += wallet.amount;
-          walletList.innerHTML += `
-            <div class="list-item bg-white border border-slate-100 p-4 rounded-xl flex justify-between items-center shadow-sm hover:shadow-md">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+          list.innerHTML += `
+            <div class="bg-slate-50 border border-slate-100 p-2 rounded flex justify-between items-center hover:bg-white transition group">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <div class="w-6 h-6 rounded bg-indigo-100 flex items-center justify-center text-indigo-600 text-[10px] shrink-0">
                   <i class="fa-solid fa-wallet"></i>
                 </div>
-                <div>
-                  <h4 class="font-semibold text-slate-700">${wallet.name}</h4>
+                <div class="min-w-0">
+                  <h4 class="font-semibold text-slate-700 text-xs truncate">${wallet.name}</h4>
+                  <p class="text-[9px] text-slate-400">${wallet.date || '-'}</p>
                 </div>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="font-bold text-emerald-600">+ ₱${formatCurrency(wallet.amount)}</span>
-                <button onclick="deleteWallet(${index})" class="text-slate-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="font-bold text-emerald-600 text-xs">+${formatCurrency(wallet.amount)}</span>
+                <button onclick="deleteWallet(${wallets.length - 1 - index})" class="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition px-1"><i class="fa-solid fa-xmark text-xs"></i></button>
               </div>
             </div>`;
         });
       }
-      summaryTotal.textContent = formatCurrency(total);
+      document.getElementById('summaryTotal').textContent = formatCurrency(total);
       updateBalance();
+    }
+
+    function updateExpenseDisplay() {
+      const list = document.getElementById('expenseList');
+      let total = 0;
+      list.innerHTML = '';
+      if (expenses.length === 0) list.innerHTML = '<div class="text-center text-slate-400 py-4 text-xs italic">No data.</div>';
+      else {
+        expenses.slice().reverse().forEach((exp, index) => {
+          total += exp.amount;
+          const config = categoryConfig[exp.category] || categoryConfig['Others'];
+          list.innerHTML += `
+            <div class="bg-slate-50 border border-slate-100 p-2 rounded flex justify-between items-center hover:bg-white transition group">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <div class="w-6 h-6 rounded flex items-center justify-center text-[10px] shrink-0" style="background-color: ${config.bg}; color: ${config.color}">
+                  <i class="fa-solid ${config.icon}"></i>
+                </div>
+                <div class="min-w-0">
+                  <h4 class="font-semibold text-slate-700 text-xs truncate">${exp.name}</h4>
+                  <p class="text-[9px] text-slate-400 truncate">${exp.category} • ${exp.date || '-'}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="font-bold text-slate-700 text-xs">${formatCurrency(exp.amount)}</span>
+                <button onclick="deleteExpense(${expenses.length - 1 - index})" class="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition px-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+              </div>
+            </div>`;
+        });
+      }
+      document.getElementById('summaryExpenses').textContent = formatCurrency(total);
+      updateBalance(); updateChart(); updateProgressBar();
     }
 
     function addWallet() {
-      const nameIn = document.getElementById('walletName');
-      const amountIn = document.getElementById('walletAmount');
-      const name = nameIn.value.trim();
-      const amount = parseFloat(amountIn.value);
-
+      const name = document.getElementById('walletName').value.trim();
+      const amount = parseFloat(document.getElementById('walletAmount').value);
       if (name && !isNaN(amount) && amount > 0) {
-        wallets.push({ name, amount });
-        nameIn.value = '';
-        amountIn.value = '';
-        updateWalletDisplay();
+        wallets.push({ name, amount, date: getFormattedDate() });
+        document.getElementById('walletName').value = ''; document.getElementById('walletAmount').value = '';
+        saveData(); updateWalletDisplay();
       }
     }
-
-    function deleteWallet(index) {
-      wallets.splice(index, 1);
-      updateWalletDisplay();
-    }
-
-    // --- EXPENSE LOGIC ---
-    function updateExpenseDisplay() {
-      const expenseList = document.getElementById('expenseList');
-      const summaryExpenses = document.getElementById('summaryExpenses');
-      expenseList.innerHTML = '';
-      let totalExpense = 0;
-
-      if (expenses.length === 0) {
-        expenseList.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm italic">No expenses added yet.</div>';
-      } else {
-        expenses.forEach((exp, index) => {
-          totalExpense += exp.amount;
-          expenseList.innerHTML += `
-            <div class="list-item bg-white border border-slate-100 p-4 rounded-xl flex justify-between items-center shadow-sm hover:shadow-md">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
-                  <i class="fa-solid fa-receipt"></i>
-                </div>
-                <div>
-                  <h4 class="font-semibold text-slate-700">${exp.name}</h4>
-                </div>
-              </div>
-              <div class="flex items-center gap-4">
-                <span class="font-bold text-slate-700">₱${formatCurrency(exp.amount)}</span>
-                <button onclick="deleteExpense(${index})" class="text-slate-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-              </div>
-            </div>`;
-        });
-      }
-      summaryExpenses.textContent = formatCurrency(totalExpense);
-      updateBalance();
-      
-      // *** Trigger Chart Update ***
-      updateChart(); 
-    }
+    function deleteWallet(i) { wallets.splice(i, 1); saveData(); updateWalletDisplay(); }
 
     function addExpense() {
-      const nameIn = document.getElementById('expenseName');
-      const amountIn = document.getElementById('expenseAmount');
-      const name = nameIn.value.trim();
-      const amount = parseFloat(amountIn.value);
-
+      const name = document.getElementById('expenseName').value.trim();
+      const cat = document.getElementById('expenseCategory').value;
+      const amount = parseFloat(document.getElementById('expenseAmount').value);
       if (name && !isNaN(amount) && amount > 0) {
-        expenses.push({ name, amount });
-        nameIn.value = '';
-        amountIn.value = '';
-        updateExpenseDisplay();
+        expenses.push({ name, category: cat, amount, date: getFormattedDate() });
+        document.getElementById('expenseName').value = ''; document.getElementById('expenseAmount').value = '';
+        saveData(); updateExpenseDisplay();
       }
     }
-
-    function deleteExpense(index) {
-      expenses.splice(index, 1);
-      updateExpenseDisplay();
-    }
+    function deleteExpense(i) { expenses.splice(i, 1); saveData(); updateExpenseDisplay(); }
 
     function updateBalance() {
       const total = wallets.reduce((acc, w) => acc + w.amount, 0);
-      const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-      const remaining = total - totalExpenses;
-      const balanceEl = document.getElementById('summaryBalance');
-      
-      balanceEl.textContent = formatCurrency(remaining);
-      if (remaining < 0) {
-        balanceEl.parentElement.classList.replace('text-slate-800', 'text-rose-600');
-      } else {
-        balanceEl.parentElement.classList.replace('text-rose-600', 'text-slate-800');
-      }
+      const exp = expenses.reduce((acc, e) => acc + e.amount, 0);
+      const rem = total - exp;
+      const el = document.getElementById('summaryBalance');
+      el.textContent = formatCurrency(rem);
+      el.parentElement.className = rem < 0 ? "text-2xl font-bold text-rose-600" : "text-2xl font-bold text-slate-800";
     }
-
-    // Initialize displays
-    updateWalletDisplay();
-    updateExpenseDisplay();
   </script>
 </body>
 </html>
