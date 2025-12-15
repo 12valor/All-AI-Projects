@@ -3,26 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Budget Tracker</title>
+  <title>Smart Budget Tracker v2.5</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-    }
-    /* Smooth transition for list items */
-    .list-item {
-      transition: all 0.2s ease-in-out;
-    }
-    .list-item:hover {
-      transform: translateY(-2px);
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .list-item { transition: all 0.2s ease-in-out; }
+    .list-item:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
@@ -31,39 +25,48 @@
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-3">
         <i class="fa-solid fa-wallet text-2xl"></i>
-        <h1 class="text-2xl font-bold tracking-tight">FinTrack</h1>
-      </div>
-      <div class="text-indigo-100 text-sm font-medium bg-indigo-700 px-3 py-1 rounded-full">
-        v2.0
+        <h1 class="text-2xl font-bold tracking-tight">FinTrack <span class="text-indigo-300 text-base font-normal">| Dashboard</span></h1>
       </div>
     </div>
   </nav>
 
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
-        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
           <i class="fa-solid fa-scale-balanced text-6xl text-indigo-600"></i>
         </div>
         <p class="text-slate-500 font-medium mb-1">Remaining Balance</p>
         <h2 class="text-3xl font-bold text-slate-800">₱<span id="summaryBalance">0.00</span></h2>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
-        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
           <i class="fa-solid fa-circle-arrow-up text-6xl text-emerald-500"></i>
         </div>
         <p class="text-slate-500 font-medium mb-1">Total Assets</p>
         <h2 class="text-3xl font-bold text-emerald-600">₱<span id="summaryTotal">0.00</span></h2>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
-        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
           <i class="fa-solid fa-circle-arrow-down text-6xl text-rose-500"></i>
         </div>
-        <p class="text-slate-500 font-medium mb-1">Monthly Expenses</p>
+        <p class="text-slate-500 font-medium mb-1">Total Expenses</p>
         <h2 class="text-3xl font-bold text-rose-600">₱<span id="summaryExpenses">0.00</span></h2>
+      </div>
+    </section>
+
+    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8">
+      <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
+        <i class="fa-solid fa-chart-pie mr-2 text-indigo-500"></i> Expense Breakdown
+      </h3>
+      <div class="relative h-64 w-full flex justify-center items-center">
+        <canvas id="expenseChart"></canvas>
+        <div id="chartEmptyState" class="absolute text-slate-400 text-sm italic hidden">
+          Add expenses to see analytics
+        </div>
       </div>
     </section>
 
@@ -71,44 +74,32 @@
       
       <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-700"><i class="fa-solid fa-money-bill-wave mr-2 text-indigo-500"></i> E-Wallets & Banks</h3>
+          <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-700">E-Wallets & Banks</h3>
           </div>
-          
           <div class="p-6 space-y-4">
             <div class="flex flex-col sm:flex-row gap-3">
-              <input id="walletName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition" type="text" placeholder="Source (e.g. GCash)" />
-              <input id="walletAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 outline-none transition" type="number" placeholder="Amount" />
-              <button onclick="addWallet()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                <i class="fa-solid fa-plus"></i>
-              </button>
+              <input id="walletName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-indigo-500" type="text" placeholder="Source (e.g. GCash)" />
+              <input id="walletAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-indigo-500" type="number" placeholder="Amount" />
+              <button onclick="addWallet()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm px-5 py-2.5"><i class="fa-solid fa-plus"></i></button>
             </div>
-
-            <div id="walletList" class="space-y-3 mt-4 max-h-[400px] overflow-y-auto pr-1">
-              <div class="text-center text-slate-400 py-8 text-sm italic">No wallets added yet.</div>
-            </div>
+            <div id="walletList" class="space-y-3 mt-4 max-h-[300px] overflow-y-auto pr-1"></div>
           </div>
         </div>
       </div>
 
       <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-700"><i class="fa-solid fa-receipt mr-2 text-rose-500"></i> Monthly Expenses</h3>
+          <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-700">Expenses</h3>
           </div>
-
           <div class="p-6 space-y-4">
             <div class="flex flex-col sm:flex-row gap-3">
-              <input id="expenseName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2.5 outline-none transition" type="text" placeholder="Bill (e.g. Netflix)" />
-              <input id="expenseAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2.5 outline-none transition" type="number" placeholder="Amount" />
-              <button onclick="addExpense()" class="bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                <i class="fa-solid fa-plus"></i>
-              </button>
+              <input id="expenseName" class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-rose-500" type="text" placeholder="Bill (e.g. Netflix)" />
+              <input id="expenseAmount" class="w-full sm:w-32 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2.5 outline-none focus:border-rose-500" type="number" placeholder="Amount" />
+              <button onclick="addExpense()" class="bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg text-sm px-5 py-2.5"><i class="fa-solid fa-plus"></i></button>
             </div>
-
-            <div id="expenseList" class="space-y-3 mt-4 max-h-[400px] overflow-y-auto pr-1">
-               <div class="text-center text-slate-400 py-8 text-sm italic">No expenses added yet.</div>
-            </div>
+            <div id="expenseList" class="space-y-3 mt-4 max-h-[300px] overflow-y-auto pr-1"></div>
           </div>
         </div>
       </div>
@@ -119,21 +110,74 @@
   <script>
     let wallets = [];
     let expenses = [];
+    let myChart = null; // Variable to hold the chart instance
 
-    // Helper to format currency
+    // Currency Formatter
     const formatCurrency = (num) => {
       return num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+    // --- CHART LOGIC ---
+    function updateChart() {
+      const ctx = document.getElementById('expenseChart').getContext('2d');
+      const emptyState = document.getElementById('chartEmptyState');
+      
+      // If no expenses, hide chart and show text
+      if (expenses.length === 0) {
+        if (myChart) myChart.destroy();
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      const labels = expenses.map(e => e.name);
+      const data = expenses.map(e => e.amount);
+
+      // Destroy old chart to prevent "glitch" or overlap
+      if (myChart) {
+        myChart.destroy();
+      }
+
+      myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Amount (₱)',
+            data: data,
+            backgroundColor: [
+              '#6366f1', // Indigo
+              '#ec4899', // Pink
+              '#10b981', // Emerald
+              '#f59e0b', // Amber
+              '#3b82f6', // Blue
+              '#8b5cf6', // Violet
+            ],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' }
+          },
+          layout: { padding: 20 }
+        }
+      });
+    }
+
+    // --- WALLET LOGIC ---
     function updateWalletDisplay() {
       const walletList = document.getElementById('walletList');
       const summaryTotal = document.getElementById('summaryTotal');
-      
       walletList.innerHTML = '';
       let total = 0;
 
       if (wallets.length === 0) {
-        walletList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">No wallets added yet.</div>';
+        walletList.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm italic">No wallets added yet.</div>';
       } else {
         wallets.forEach((wallet, index) => {
           total += wallet.amount;
@@ -145,14 +189,11 @@
                 </div>
                 <div>
                   <h4 class="font-semibold text-slate-700">${wallet.name}</h4>
-                  <p class="text-xs text-slate-400">Source</p>
                 </div>
               </div>
               <div class="flex items-center gap-4">
                 <span class="font-bold text-emerald-600">+ ₱${formatCurrency(wallet.amount)}</span>
-                <button onclick="deleteWallet(${index})" class="text-slate-300 hover:text-rose-500 transition-colors">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <button onclick="deleteWallet(${index})" class="text-slate-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>`;
         });
@@ -172,8 +213,6 @@
         nameIn.value = '';
         amountIn.value = '';
         updateWalletDisplay();
-      } else {
-        alert("Please enter a valid name and amount.");
       }
     }
 
@@ -182,15 +221,15 @@
       updateWalletDisplay();
     }
 
+    // --- EXPENSE LOGIC ---
     function updateExpenseDisplay() {
       const expenseList = document.getElementById('expenseList');
       const summaryExpenses = document.getElementById('summaryExpenses');
-      
       expenseList.innerHTML = '';
       let totalExpense = 0;
 
       if (expenses.length === 0) {
-        expenseList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">No expenses added yet.</div>';
+        expenseList.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm italic">No expenses added yet.</div>';
       } else {
         expenses.forEach((exp, index) => {
           totalExpense += exp.amount;
@@ -198,24 +237,24 @@
             <div class="list-item bg-white border border-slate-100 p-4 rounded-xl flex justify-between items-center shadow-sm hover:shadow-md">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
-                  <i class="fa-solid fa-file-invoice"></i>
+                  <i class="fa-solid fa-receipt"></i>
                 </div>
                 <div>
                   <h4 class="font-semibold text-slate-700">${exp.name}</h4>
-                  <p class="text-xs text-slate-400">Monthly Bill</p>
                 </div>
               </div>
               <div class="flex items-center gap-4">
                 <span class="font-bold text-slate-700">₱${formatCurrency(exp.amount)}</span>
-                <button onclick="deleteExpense(${index})" class="text-slate-300 hover:text-rose-500 transition-colors">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <button onclick="deleteExpense(${index})" class="text-slate-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>`;
         });
       }
       summaryExpenses.textContent = formatCurrency(totalExpense);
       updateBalance();
+      
+      // *** Trigger Chart Update ***
+      updateChart(); 
     }
 
     function addExpense() {
@@ -229,8 +268,6 @@
         nameIn.value = '';
         amountIn.value = '';
         updateExpenseDisplay();
-      } else {
-        alert("Please enter a valid name and amount.");
       }
     }
 
@@ -243,44 +280,19 @@
       const total = wallets.reduce((acc, w) => acc + w.amount, 0);
       const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
       const remaining = total - totalExpenses;
-      
       const balanceEl = document.getElementById('summaryBalance');
+      
       balanceEl.textContent = formatCurrency(remaining);
-
-      // Color coding for balance
       if (remaining < 0) {
-        balanceEl.parentElement.classList.remove('text-slate-800');
-        balanceEl.parentElement.classList.add('text-rose-600');
+        balanceEl.parentElement.classList.replace('text-slate-800', 'text-rose-600');
       } else {
-        balanceEl.parentElement.classList.remove('text-rose-600');
-        balanceEl.parentElement.classList.add('text-slate-800');
+        balanceEl.parentElement.classList.replace('text-rose-600', 'text-slate-800');
       }
     }
-    // 1. Load data when app starts
-function init() {
-  const storedWallets = localStorage.getItem('wallets');
-  const storedExpenses = localStorage.getItem('expenses');
-  
-  if (storedWallets) wallets = JSON.parse(storedWallets);
-  if (storedExpenses) expenses = JSON.parse(storedExpenses);
-  
-  updateWalletDisplay();
-  updateExpenseDisplay();
-}
 
-// 2. Save data helper
-function saveData() {
-  localStorage.setItem('wallets', JSON.stringify(wallets));
-  localStorage.setItem('expenses', JSON.stringify(expenses));
-}
-
-// 3. Update your add/delete functions to call saveData()
-function addWallet() {
-  // ... existing code ...
-  wallets.push({ name, amount });
-  saveData(); // <--- Add this
-  updateWalletDisplay();
-}
+    // Initialize displays
+    updateWalletDisplay();
+    updateExpenseDisplay();
   </script>
 </body>
 </html>
